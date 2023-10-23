@@ -150,7 +150,7 @@ def download_if_not_exists(url, local_filename):
 
 
 download_if_not_exists("https://github.com/seiyria/gameicons-font/raw/master/dist/game-icons.css", "game-icons.css")
-download_if_not_exists("https://github.com/seiyria/gameicons-font/raw/master/dist/game-icons.ttf", "game-icons.ttf")
+download_if_not_exists("https://github.com/seiyria/gameicons-font/raw/master/dist/game-icons.ttf", "../game-icons.ttf")
 
 
 # Read CSS from "game-icons.css" file
