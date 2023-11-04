@@ -1,6 +1,5 @@
 import csv
 import json
-import os
 import re
 import urllib.request
 
@@ -73,84 +72,71 @@ def fix(code):
     if code == "d12":
         return "dice 12"
     if code == "pawprint":
-        return "paw print"
+        return "paw-print"
     if code == "rapidshare-arrow":
         return "rapid sharing arrow"
+    if code == "bal-leth":
+        return "bat-leth"
 
 
 def css_to_csv(css_text, csv_writer):
     # Define a regular expression pattern to match CSS rules
-    pattern = r'\.game-icon-(.*):before\s*{\s*content:\s*"\\f(.*?)"\s*;\s*}'
-
-    # Find all matches in the CSS text
-    matches = re.findall(pattern, css_text)
+    chars = css_text.split(".game-icon-")
+    chars.pop(0)
+    print(len(chars), "symbols found")
 
     # Iterate through the matches and extract the data
     i = 0
-    for match in matches:
-        code = match[0].strip()
-        hex_value = match[1].strip()
-        unicode_char = f'=UNICHAR(HEX2DEC("{hex_value}"))'
+    for char in chars:
+        pattern = r'(.*):before\s*{\s*content:\s*"\\(.*?)"'
+        match = re.findall(pattern, char)
+        if not match:
+            continue
+
+        name = match[0][0].strip()
+        code = match[0][1].strip()
+        symbol = chr(int(f"{code}", 16))
+        formula = f'=UNICHAR(HEX2DEC("{code}"))'
         i += 1
-        csv_row = store.get(code)
-        is_two = False
-        if code.endswith("-2"):
-            is_two = True
-            code = code[:-2]
-        if not csv_row:
+        desc = store.get(name)
+        if desc:
+            desc = desc[0]
+        # is_two = False
+        # if name.endswith("-2"):
+        #    is_two = True
+        #    name = name[:-2]
+        if not desc:
             found = False
-            for subcode in [code, code.split("-")[0], code.split("-")[-1], fix(code)]:
-                if not subcode:
+            for subname in [name, name.split("-")[0], name.split("-")[-1], fix(name)]:
+                if not subname:
                     continue
                 if found:
                     break
-                json_data = search_gameicons(subcode)
+                json_data = search_gameicons(subname)
                 hits = json_data.get("results", [])[0].get("hits", [])
-                if is_two and len(hits) > 1:
-                    hits.pop(0)
+                # if is_two and len(hits) > 1:
+                #    hits.pop(0)
                 for hit in hits:
                     id = hit.get("id", "").split("/")[-1]
-                    if id != code:
+                    if id != name and id != fix(name):
                         continue
-                    name = hit.get("name", "")
+                    friendly = hit.get("name", "")
                     content = hit.get("content", "")
                     tags = hit.get("tags", "")
-                    description = f"{name}: {content} ({tags})".replace("  ", " ").replace("  ", " ")
+                    desc = f"{friendly}: {content} ({tags})".replace("  ", " ").replace("  ", " ")
                     if is_two:
-                        code += "-2"
-                    csv_row = [code, unicode_char, description]
-                    store.set(code, *csv_row)
+                        name += "-2"
                     found = True
-                    print(i, csv_row)
+                    print(i, name, desc)
                     break
             if not found:
-                if is_two:
-                    code += "-2"
-                print(str(len(hits)) + " matches but no exact matches for " + code)
-                print(hits)
-                csv_row = [code, unicode_char, code + " (missing)"]
-                store.set(code, *csv_row)
-                print(i, csv_row)
+                # if is_two:
+                #    name += "-2"
+                print(str(len(hits)) + " matches but no exact matches for " + name)
+                desc = name + " (missing)"
+            store.set(name, desc)
+        csv_row = [name, symbol, formula, code, desc]
         csv_writer.writerow(csv_row)
-
-
-def download_if_not_exists(url, local_filename):
-    """
-    Download the specified file from the given URL if it doesn't exist locally.
-    """
-    if not os.path.exists(local_filename):
-        try:
-            with urllib.request.urlopen(url) as response, open(local_filename, "wb") as out_file:
-                out_file.write(response.read())
-            print(f"{local_filename} downloaded successfully!")
-        except Exception as e:
-            print(f"Error while downloading {local_filename}: {str(e)}")
-    else:
-        print(f"{local_filename} already exists!")
-
-
-download_if_not_exists("https://github.com/seiyria/gameicons-font/raw/master/dist/game-icons.css", "game-icons.css")
-download_if_not_exists("https://github.com/seiyria/gameicons-font/raw/master/dist/game-icons.ttf", "../game-icons.ttf")
 
 
 # Read CSS from "game-icons.css" file
@@ -160,9 +146,9 @@ with open("game-icons.css", "r") as css_file:
 # Convert CSS to CSV
 
 # Write CSV data to "game-icons-build.csv" file
-with open("game-icons-build.csv", "w", newline="") as csv_file:
+with open("game-icons-build.csv", "w", newline="", encoding="utf-8") as csv_file:
     csv_writer = csv.writer(csv_file)
-    csv_writer.writerow(["Name", "Char", "Description"])
+    csv_writer.writerow(["Name", "Symbol", "Formula", "Code", "Description"])
     css_to_csv(css_input, csv_writer)
 
 print("Conversion completed. CSV data saved to 'game-icons-build.csv'.")
