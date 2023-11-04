@@ -8,7 +8,7 @@ _make:
 
 _deps:
   if [ -e gameicons-font ]; then cd gameicons-font && git reset --hard HEAD && git pull; fi
-  if [ ! -e gameicons-font ]; then git clone --depth 1 https://github.com/seiyria/gameicons-font.git; fi
+  if [ ! -e gameicons-font ]; then git clone --depth 1 https://github.com/seansbox/gameicons-font.git; fi
   cd gameicons-font && sed -i.bak 's|startCodepoint: 0xF000|startCodepoint: 0xac00|g' download-and-format-icons.js
   cd gameicons-font && npm upgrade && npm install
   cd gameicons-font && npm run build:font
