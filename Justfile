@@ -13,4 +13,5 @@ _deps:
   cd gameicons-font && npm upgrade && npm install
   cd gameicons-font && npm run build:font
   cp gameicons-font/dist/game-icons.css ./src
-  cp gameicons-font/dist/game-icons.ttf .
+  cp gameicons-font/dist/game-icons* .
+  rm game-icons.svg

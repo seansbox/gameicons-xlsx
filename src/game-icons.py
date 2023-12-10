@@ -124,8 +124,8 @@ def css_to_csv(css_text, csv_writer):
                     content = hit.get("content", "")
                     tags = hit.get("tags", "")
                     desc = f"{friendly}: {content} ({tags})".replace("  ", " ").replace("  ", " ")
-                    if is_two:
-                        name += "-2"
+                    # if is_two:
+                    #    name += "-2"
                     found = True
                     print(i, name, desc)
                     break

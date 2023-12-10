@@ -1,6 +1,6 @@
 # gameicons-xlsx
 
-A keyword-searchable Excel + Font representation of the incredible game-icons library
+A keyword-searchable Webfont and Excel representation of the incredible game-icons library
 
 ## Description
 
